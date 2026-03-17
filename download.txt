@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+.env
+confession_state.json
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
