@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>confessions.za</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f0f;
+    --surface: #1a1a1a;
+    --surface2: #222;
+    --border: #2a2a2a;
+    --text: #f0f0f0;
+    --text-muted: #888;
+    --text-dim: #555;
+    --accent: #E5BE4A;
+    --accept: #4CAF7D;
+    --reject: #E05C5C;
+    --radius: 16px;
+    --font: 'DM Sans', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* TOP BAR */
+  .topbar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    z-index: 100;
+    padding: 14px 20px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .topbar-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    letter-spacing: 0.02em;
+    color: var(--text);
+  }
+
+  .topbar-logo span { color: var(--accent); }
+
+  .topbar-right {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .sort-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-family: var(--font);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .sort-btn.active {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .refresh-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 18px;
+    padding: 4px;
+    transition: color 0.2s;
+  }
+
+  .refresh-btn:hover { color: var(--accent); }
+
+  /* STATE BAR */
+  .state-bar {
+    position: fixed;
+    top: 57px; left: 0; right: 0;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    z-index: 99;
+    padding: 8px 20px;
+    display: flex;
+    gap: 16px;
+    align-items: center;
+  }
+
+  .state-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .state-item span {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .state-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  .state-dot.sub { background: #9B59B6; }
+
+  /* MAIN CONTENT */
+  .content {
+    padding-top: 110px;
+    padding-bottom: 40px;
+  }
+
+  /* AUTH SCREEN */
+  .auth-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 70vh;
+    text-align: center;
+    padding: 40px 20px;
+  }
+
+  .auth-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 36px;
+    margin-bottom: 8px;
+  }
+
+  .auth-logo span { color: var(--accent); }
+
+  .auth-sub {
+    color: var(--text-muted);
+    font-size: 14px;
+    margin-bottom: 40px;
+  }
+
+  .auth-btn {
+    background: var(--accent);
+    color: #1a1000;
+    border: none;
+    padding: 16px 32px;
+    border-radius: 50px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: var(--font);
+    cursor: pointer;
+    transition: transform 0.2s, opacity 0.2s;
+  }
+
+  .auth-btn:active { transform: scale(0.97); opacity: 0.9; }
+
+  /* LOADING */
+  .loading {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+    font-size: 14px;
+  }
+
+  .spinner {
+    width: 32px; height: 32px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 16px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* CONFESSION CARDS */
+  .cards-list { padding: 0 16px; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 12px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+
+  .card-header {
+    padding: 14px 16px 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .card-date { font-size: 11px; color: var(--text-dim); letter-spacing: 0.03em; }
+  .card-badges { display: flex; gap: 6px; align-items: center; }
+  .holiday-badge { font-size: 16px; line-height: 1; }
+
+  .card-body { padding: 0 16px 14px; }
+
+  .card-confession {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text);
+    margin-bottom: 10px;
+  }
+
+  .card-location { font-size: 12px; color: var(--text-muted); }
+  .card-location::before { content: "📍 "; font-size: 11px; }
+
+  .card-actions { display: flex; border-top: 1px solid var(--border); }
+
+  .card-actions button {
+    flex: 1;
+    background: none;
+    border: none;
+    padding: 13px;
+    font-family: var(--font);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+  }
+
+  .btn-reject { color: var(--reject); border-right: 1px solid var(--border); }
+  .btn-reject:active { background: rgba(224,92,92,0.08); }
+  .btn-public { color: var(--accept); border-right: 1px solid var(--border); }
+  .btn-public:active { background: rgba(76,175,125,0.08); }
+  .btn-sub { color: #9B59B6; }
+  .btn-sub:active { background: rgba(155,89,182,0.08); }
+
+  /* PREVIEW MODAL */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 20px 16px;
+    overflow-y: auto;
+  }
+
+  .modal-overlay.hidden { display: none; }
+
+  .modal-header {
+    width: 100%;
+    max-width: 420px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+
+  .modal-title { font-size: 15px; font-weight: 600; color: var(--text); }
+
+  .modal-close {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font);
+  }
+
+  /* POST CANVAS — 4:5 Instagram feed */
+  .post-preview-wrap {
+    width: 100%;
+    max-width: 360px;
+    margin: 0 auto 20px;
+    container-type: inline-size;
+    container-name: postcanvas;
+  }
+
+  .post-canvas {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10% 10%;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .post-subscriber-badge {
+    position: absolute;
+    top: 5%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 0.5cqw solid #E5BE4A;
+    border-radius: 20cqw;
+    padding: 1cqw 3.5cqw;
+    display: flex;
+    align-items: center;
+    gap: 1.5cqw;
+    white-space: nowrap;
+    background: rgba(0,0,0,0.15);
+    font-size: 2.8cqw;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: #E5BE4A;
+    text-transform: uppercase;
+  }
+
+  .post-content {
+    text-align: center;
+    color: #ffffff;
+    width: 100%;
+  }
+
+  .post-number {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 4.8cqw;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    margin-bottom: 1.5cqw;
+    color: #ffffff;
+    text-align: center;
+  }
+
+  .post-text {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 4.8cqw;
+    font-weight: 400;
+    line-height: 1.18;
+    letter-spacing: 0em;
+    margin-bottom: 3cqw;
+    color: #ffffff;
+    text-align: center;
+  }
+
+  .post-location {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 4.8cqw;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    color: #ffffff;
+    text-align: center;
+  }
+
+  /* EDIT CONTROLS */
+  .edit-controls {
+    width: 100%;
+    max-width: 420px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .edit-row { display: flex; gap: 10px; }
+  .edit-group { flex: 1; }
+
+  .edit-label {
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+  }
+
+  .edit-input {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 14px;
+    padding: 10px 12px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .edit-input:focus { border-color: var(--accent); }
+  textarea.edit-input { resize: none; height: 80px; }
+
+  /* COLOR PICKER */
+  .color-picker { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .color-swatch {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: transform 0.15s, border-color 0.15s;
+  }
+
+  .color-swatch.selected {
+    border-color: white;
+    transform: scale(1.15);
+  }
+
+  /* BUTTONS */
+  .download-btn {
+    width: 100%;
+    max-width: 420px;
+    background: var(--accent);
+    color: #1a1000;
+    border: none;
+    padding: 16px;
+    border-radius: 50px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: var(--font);
+    cursor: pointer;
+    letter-spacing: 0.02em;
+    transition: transform 0.15s, opacity 0.15s;
+    margin-bottom: 12px;
+  }
+
+  .download-btn:active { transform: scale(0.98); opacity: 0.9; }
+  .download-btn.saved { background: var(--accept); color: white; }
+
+  .cancel-btn {
+    width: 100%;
+    max-width: 420px;
+    background: none;
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    padding: 14px;
+    border-radius: 50px;
+    font-size: 14px;
+    font-family: var(--font);
+    cursor: pointer;
+    margin-bottom: 20px;
+  }
+
+  /* EMPTY STATE */
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--text-muted); }
+  .empty-icon { font-size: 40px; margin-bottom: 16px; }
+  .empty-text { font-size: 15px; margin-bottom: 8px; color: var(--text); }
+  .empty-sub { font-size: 13px; }
+
+  /* COUNT BADGE */
+  .count-badge {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 6px 16px;
+    font-size: 12px;
+    color: var(--text-muted);
+    text-align: center;
+    margin: 0 16px 12px;
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-logo">confessions<span>.za</span></div>
+  <div class="topbar-right">
+    <button class="sort-btn active" id="sort-newest" onclick="setSort('newest')">Newest</button>
+    <button class="sort-btn" id="sort-oldest" onclick="setSort('oldest')">Oldest</button>
+    <button class="refresh-btn" onclick="loadConfessions()" title="Refresh">↻</button>
+  </div>
+</div>
+
+<div class="state-bar">
+  <div class="state-item">
+    <div class="state-dot"></div>
+    Public #<span id="pub-num">—</span>
+  </div>
+  <div class="state-item">
+    <div class="state-dot sub"></div>
+    Sub #<span id="sub-num">—</span>
+  </div>
+  <div class="state-item" style="margin-left:auto;">
+    <div id="next-color-pub" style="width:10px;height:10px;border-radius:50%;background:#888;"></div>
+    <span style="font-size:11px;">next pub</span>
+  </div>
+  <div class="state-item">
+    <div id="next-color-sub" style="width:10px;height:10px;border-radius:50%;background:#888;"></div>
+    <span style="font-size:11px;">next sub</span>
+  </div>
+</div>
+
+<div class="content" id="main-content">
+  <div class="loading" id="loading-state">
+    <div class="spinner"></div>
+    Checking authentication...
+  </div>
+</div>
+
+<!-- PREVIEW MODAL -->
+<div class="modal-overlay hidden" id="preview-modal">
+  <div class="modal-header">
+    <div class="modal-title">Preview & Save</div>
+    <button class="modal-close" onclick="closeModal()">×</button>
+  </div>
+
+  <div class="post-preview-wrap">
+    <div class="post-canvas" id="post-canvas">
+      <div class="post-subscriber-badge" id="sub-badge" style="display:none;">
+        <span style="font-size:3.2cqw;">⭐</span>
+        <span>Subscribers Only</span>
+      </div>
+      <div class="post-content">
+        <div class="post-number" id="preview-number"></div>
+        <div class="post-text" id="preview-text"></div>
+        <div class="post-location" id="preview-location"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="edit-controls">
+    <div class="edit-group">
+      <div class="edit-label">Color</div>
+      <div class="color-picker" id="color-picker"></div>
+    </div>
+
+    <div class="edit-row">
+      <div class="edit-group" style="flex:0 0 130px;">
+        <div class="edit-label">Confession #</div>
+        <input type="number" class="edit-input" id="edit-number" oninput="updatePreview()">
+      </div>
+      <div class="edit-group">
+        <div class="edit-label">Location</div>
+        <input type="text" class="edit-input" id="edit-location" oninput="updatePreview()">
+      </div>
+    </div>
+
+    <div class="edit-group">
+      <div class="edit-label">Confession Text</div>
+      <textarea class="edit-input" id="edit-text" oninput="updatePreview()"></textarea>
+    </div>
+  </div>
+
+  <button class="download-btn" id="download-btn" onclick="saveImage()">💾 Save to Camera Roll</button>
+  <button class="cancel-btn" onclick="closeModal()">Cancel</button>
+</div>
+
+<script>
+const COLORS = [
+  "#C5A8D4", "#6CC76C", "#E89090", "#2C3E4A",
+  "#7AA8F0", "#6B2D8B", "#6B2535", "#E8C14E",
+  "#7B96A8", "#8A94C8", "#C2A8D8", "#E06070",
+  "#8ECBA8", "#963870"
+];
+
+let state = { public_number: 1, subscriber_number: 1, color_index: 0, sub_color_index: 0 };
+let sortOrder = 'newest';
+let activeConfessionIdx = null;
+let activeConfessionId = null;  // stable id reference, unaffected by cache shifts
+let activePostType = null;
+let selectedColorIdx = null;
+let confessionsCache = [];
+
+async function init() {
+  try {
+    const res = await fetch('/api/auth-status');
+    const data = await res.json();
+    if (!data.authenticated) {
+      showAuthScreen();
+    } else {
+      await loadState();
+      await loadConfessions();
+    }
+  } catch(e) {
+    showAuthScreen();
+  }
+}
+
+async function loadState() {
+  const res = await fetch('/api/state');
+  state = await res.json();
+  updateStateBar();
+}
+
+function updateStateBar() {
+  document.getElementById('pub-num').textContent = state.public_number;
+  document.getElementById('sub-num').textContent = state.subscriber_number;
+  document.getElementById('next-color-pub').style.background = COLORS[state.color_index % COLORS.length];
+  document.getElementById('next-color-sub').style.background = COLORS[state.sub_color_index % COLORS.length];
+}
+
+function showAuthScreen() {
+  document.getElementById('main-content').innerHTML = `
+    <div class="auth-screen">
+      <div class="auth-logo">confessions<span>.za</span></div>
+      <div class="auth-sub">Connect your Gmail to get started</div>
+      <button class="auth-btn" onclick="window.location='/authorize'">Connect Gmail →</button>
+    </div>
+  `;
+}
+
+async function loadConfessions() {
+  document.getElementById('main-content').innerHTML = `
+    <div class="loading"><div class="spinner"></div>Loading confessions...</div>
+  `;
+
+  try {
+    const res = await fetch('/api/confessions?sort=' + sortOrder);
+    const data = await res.json();
+
+    if (!data.authenticated) {
+      showAuthScreen();
+      return;
+    }
+
+    confessionsCache = data.confessions || [];
+    renderConfessions(confessionsCache);
+  } catch(e) {
+    document.getElementById('main-content').innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">⚠️</div>
+        <div class="empty-text">Failed to load</div>
+        <div class="empty-sub">${e.message}</div>
+      </div>
+    `;
+  }
+}
+
+function renderConfessions(list) {
+  const content = document.getElementById('main-content');
+
+  if (!list.length) {
+    content.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">📬</div>
+        <div class="empty-text">No unread confessions</div>
+        <div class="empty-sub">All caught up!</div>
+      </div>
+    `;
+    return;
+  }
+
+  let html = '<div class="count-badge">' + list.length + ' unread confession' + (list.length !== 1 ? 's' : '') + '</div>';
+  html += '<div class="cards-list">';
+
+  list.forEach((c) => {
+    const holiday = c.holiday_emoji ? '<span class="holiday-badge">' + c.holiday_emoji + '</span>' : '';
+    html += `
+      <div class="card" id="card-${c.id}">
+        <div class="card-header">
+          <div class="card-date">${c.date}</div>
+          <div class="card-badges">${holiday}</div>
+        </div>
+        <div class="card-body">
+          <div class="card-confession">${escapeHtml(c.confession)}</div>
+          ${c.location ? '<div class="card-location">' + escapeHtml(c.location) + '</div>' : ''}
+        </div>
+        <div class="card-actions">
+          <button class="btn-reject" onclick="rejectConfession('${c.id}')">✕ Reject</button>
+          <button class="btn-public" onclick="openPreviewById('${c.id}', 'public')">✓ Public</button>
+          <button class="btn-sub" onclick="openPreviewById('${c.id}', 'subscriber')">⭐ Sub</button>
+        </div>
+      </div>
+    `;
+  });
+
+  html += '</div>';
+  content.innerHTML = html;
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function openPreviewById(id, type) {
+  const idx = confessionsCache.findIndex(c => c.id === id);
+  if (idx === -1) { console.error('Confession not found:', id); return; }
+  activeConfessionIdx = idx;
+  activeConfessionId = id;
+  activePostType = type;
+
+  const c = confessionsCache[idx];
+  const colorIdx = type === 'subscriber' ? state.sub_color_index : state.color_index;
+  selectedColorIdx = colorIdx % COLORS.length;
+
+  const number = type === 'subscriber' ? state.subscriber_number : state.public_number;
+
+  document.getElementById('edit-number').value = number;
+  document.getElementById('edit-location').value = c.location || '';
+  document.getElementById('edit-text').value = c.confession;
+
+  const badge = document.getElementById('sub-badge');
+  badge.style.display = type === 'subscriber' ? 'flex' : 'none';
+
+  buildColorPicker();
+  applyColor(selectedColorIdx);
+  updatePreview();
+
+  document.getElementById('preview-modal').classList.remove('hidden');
+  document.getElementById('download-btn').textContent = '💾 Save to Camera Roll';
+  document.getElementById('download-btn').classList.remove('saved');
+  document.getElementById('download-btn').disabled = false;
+
+  document.getElementById('preview-modal').scrollTop = 0;
+}
+
+function buildColorPicker() {
+  const picker = document.getElementById('color-picker');
+  picker.innerHTML = '';
+  COLORS.forEach((color, i) => {
+    const sw = document.createElement('div');
+    sw.className = 'color-swatch' + (i === selectedColorIdx ? ' selected' : '');
+    sw.style.background = color;
+    sw.onclick = () => {
+      selectedColorIdx = i;
+      document.querySelectorAll('.color-swatch').forEach((s, j) => s.classList.toggle('selected', j === i));
+      applyColor(i);
+    };
+    picker.appendChild(sw);
+  });
+}
+
+function applyColor(idx) {
+  document.getElementById('post-canvas').style.background = COLORS[idx];
+}
+
+function updatePreview() {
+  const num = document.getElementById('edit-number').value;
+  const text = document.getElementById('edit-text').value;
+  const loc = document.getElementById('edit-location').value;
+  const type = activePostType;
+
+  const label = type === 'subscriber' ? 'Subscriber Confession #' + num : 'Confession #' + num;
+  document.getElementById('preview-number').textContent = label;
+  document.getElementById('preview-text').textContent = '“' + text + '”';
+  document.getElementById('preview-location').textContent = loc;
+}
+
+function closeModal() {
+  document.getElementById('preview-modal').classList.add('hidden');
+  activeConfessionIdx = null;
+  activePostType = null;
+}
+
+async function saveImage() {
+  const btn = document.getElementById('download-btn');
+  btn.textContent = '⏳ Generating...';
+  btn.disabled = true;
+
+  try {
+    const num = document.getElementById('edit-number').value;
+    const text = document.getElementById('edit-text').value;
+    const loc = document.getElementById('edit-location').value;
+    const type = activePostType;
+    const bgColor = COLORS[selectedColorIdx];
+
+    // Re-find confession by id in case cache index shifted since modal opened
+    const freshIdx = confessionsCache.findIndex(c => c.id === activeConfessionId);
+    if (freshIdx !== -1) activeConfessionIdx = freshIdx;
+
+    // Draw directly to canvas — no html2canvas, no borders, pixel perfect
+    const W = 1080;
+    const H = 1350;
+    const c = document.createElement('canvas');
+    c.width = W;
+    c.height = H;
+    const ctx = c.getContext('2d');
+
+    // Background
+    ctx.fillStyle = bgColor;
+    ctx.fillRect(0, 0, W, H);
+
+    // Load font
+    await document.fonts.ready;
+
+    ctx.fillStyle = '#ffffff';
+    ctx.textBaseline = 'top';
+
+    const padX = 108;  // left & right margin
+    const maxWidth = W - padX * 2;
+    const leftX = padX;
+    const centerX = W / 2;
+
+    const numFontSize = 52;
+    const textFontSize = 52;
+    const locFontSize = 52;
+    const lineH = textFontSize * 1.05;  // tight like the reference image
+
+    // Confession number — centered, lighter weight
+    ctx.font = '400 ' + numFontSize + 'px "DM Sans", sans-serif';
+    ctx.textAlign = 'center';
+    const numLabel = type === 'subscriber' ? 'Subscriber Confession #' + num : 'Confession #' + num;
+
+    // Wrap confession text
+    ctx.font = '700 ' + textFontSize + 'px "DM Sans", sans-serif';
+    ctx.textAlign = 'left';
+    const wrappedText = wrapText(ctx, '“' + text + '”', maxWidth);
+
+    // Location — centered
+    ctx.font = '400 ' + locFontSize + 'px "DM Sans", sans-serif';
+
+    // Calculate total block height
+    const numLineH = numFontSize * 1.3;
+    const gapNumToText = 12;
+    const textBlockH = wrappedText.length * lineH;
+    const gapTextToLoc = 32;
+    const totalH = numLineH + gapNumToText + textBlockH + gapTextToLoc + locFontSize;
+
+    // Start Y so block is vertically centred
+    let y = (H - totalH) / 2;
+
+    // Subscriber badge above everything
+    if (type === 'subscriber') {
+      const badgeText = '⭐  SUBSCRIBERS ONLY';
+      const badgeFontSize = 30;
+      ctx.font = '700 ' + badgeFontSize + 'px "DM Sans", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      const tw = ctx.measureText(badgeText).width;
+      const bPadX = 40, bPadY = 18;
+      const bW = tw + bPadX * 2;
+      const bH = badgeFontSize + bPadY * 2;
+      const bX = (W - bW) / 2;
+      const bY = 80;
+      ctx.fillStyle = 'rgba(0,0,0,0.15)';
+      roundRect(ctx, bX, bY, bW, bH, bH / 2);
+      ctx.fill();
+      ctx.strokeStyle = '#E5BE4A';
+      ctx.lineWidth = 3;
+      roundRect(ctx, bX, bY, bW, bH, bH / 2);
+      ctx.stroke();
+      ctx.fillStyle = '#E5BE4A';
+      ctx.fillText(badgeText, W / 2, bY + bH / 2);
+    }
+
+    // Draw number — centered
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.font = '400 ' + numFontSize + 'px "DM Sans", sans-serif';
+    ctx.fillText(numLabel, centerX, y);
+    y += numLineH + gapNumToText;
+
+    // Draw confession text — centered, tight line spacing
+    ctx.font = '400 ' + textFontSize + 'px "DM Sans", sans-serif';
+    ctx.textAlign = 'center';
+    wrappedText.forEach(line => {
+      ctx.fillText(line, centerX, y);
+      y += lineH;
+    });
+    y += gapTextToLoc;
+
+    // Draw location — centered
+    ctx.font = '400 ' + locFontSize + 'px "DM Sans", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(loc, centerX, y);
+
+    const dataUrl = c.toDataURL('image/png');
+
+    // Share via Web Share API (iPhone) or download (Android/desktop)
+    const byteString = atob(dataUrl.split(',')[1]);
+    const ab = new ArrayBuffer(byteString.length);
+    const ia = new Uint8Array(ab);
+    for (let i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i);
+    const blob = new Blob([ab], { type: 'image/png' });
+    const filename = (type === 'subscriber' ? 'sub' : 'confession') + '_' + num + '.png';
+    const file = new File([blob], filename, { type: 'image/png' });
+
+    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: filename });
+    } else {
+      const link = document.createElement('a');
+      link.download = filename;
+      link.href = dataUrl;
+      link.click();
+    }
+
+    await acceptAndAdvance();
+    btn.textContent = '✓ Done!';
+    btn.classList.add('saved');
+    btn.disabled = false;
+    const confession = confessionsCache[activeConfessionIdx];
+    if (confession) removeCard(confession.id);
+    setTimeout(() => closeModal(), 1500);
+
+  } catch(e) {
+    btn.textContent = '💾 Save to Camera Roll';
+    btn.disabled = false;
+    alert('Error: ' + e.message);
+  }
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+function wrapText(ctx, text, maxWidth) {
+  const words = text.split(' ');
+  const lines = [];
+  let current = '';
+  for (let w of words) {
+    const test = current ? current + ' ' + w : w;
+    if (ctx.measureText(test).width > maxWidth && current) {
+      lines.push(current);
+      current = w;
+    } else {
+      current = test;
+    }
+  }
+  if (current) lines.push(current);
+  return lines;
+}
+
+async function acceptAndAdvance() {
+  // Snapshot id immediately — cache may shift before async calls complete
+  const c = confessionsCache[activeConfessionIdx];
+  if (!c) return;
+  const confessionId = c.id;
+  const editedNum = parseInt(document.getElementById('edit-number').value);
+
+  if (activePostType === 'subscriber') {
+    state.subscriber_number = editedNum + 1;
+    state.sub_color_index = (selectedColorIdx + 1) % COLORS.length;
+  } else {
+    state.public_number = editedNum + 1;
+    state.color_index = (selectedColorIdx + 1) % COLORS.length;
+  }
+
+  await fetch('/api/state', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(state)
+  });
+
+  await fetch('/api/accept', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ id: confessionId, type: activePostType })
+  });
+
+  updateStateBar();
+}
+
+async function rejectConfession(id) {
+  const card = document.getElementById('card-' + id);
+  if (card) {
+    card.style.opacity = '0.4';
+    card.style.pointerEvents = 'none';
+  }
+
+  await fetch('/api/reject', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ id: id })
+  });
+
+  removeCard(id);
+}
+
+function removeCard(id) {
+  confessionsCache = confessionsCache.filter(c => c.id !== id);
+
+  const card = document.getElementById('card-' + id);
+  if (card) {
+    card.style.transition = 'all 0.3s ease';
+    card.style.transform = 'translateX(-100%)';
+    card.style.opacity = '0';
+    card.style.height = card.offsetHeight + 'px';
+    setTimeout(() => {
+      card.style.height = '0';
+      card.style.margin = '0';
+      card.style.padding = '0';
+      setTimeout(() => {
+        card.remove();
+        if (confessionsCache.length < 10) loadConfessions();
+        const badge = document.querySelector('.count-badge');
+        if (badge) badge.textContent = confessionsCache.length + ' unread confession' + (confessionsCache.length !== 1 ? 's' : '');
+      }, 200);
+    }, 300);
+  }
+}
+
+function setSort(order) {
+  sortOrder = order;
+  document.getElementById('sort-newest').classList.toggle('active', order === 'newest');
+  document.getElementById('sort-oldest').classList.toggle('active', order === 'oldest');
+  loadConfessions();
+}
+
+document.getElementById('preview-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+init();
+</script>
+</body>
+</html>
